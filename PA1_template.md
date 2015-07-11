@@ -13,7 +13,7 @@ a <- read.csv("activity.csv", colClasses = c("integer", "Date", "integer"))
 There are **17568** observations with **3** variables named  **{ steps, date, interval }**. 
 
 <!-- html table generated in R 3.2.1 by xtable 1.7-4 package -->
-<!-- Sun Jul 12 04:33:52 2015 -->
+<!-- Sun Jul 12 04:48:59 2015 -->
 <table border=1>
 <caption align="bottom"> Statistics of NA in each variable </caption>
 <tr> <th>  </th> <th> NAs </th> <th> Valid </th>  </tr>
@@ -197,7 +197,7 @@ text(x=max_pos, y=max_average$interval.average.steps, paste0("(x=",max_average$t
 As highlighted early in this report, the NAs identified as per table below. The values represent the number of rows of which the data is missing. Only **steps** has missing data. The previous analysis has discarded the missing data observation
 
 <!-- html table generated in R 3.2.1 by xtable 1.7-4 package -->
-<!-- Sun Jul 12 04:33:52 2015 -->
+<!-- Sun Jul 12 04:48:59 2015 -->
 <table border=1>
 <caption align="bottom"> Statistics of NA in each variable </caption>
 <tr> <th>  </th> <th> NAs </th> <th> Valid </th>  </tr>
@@ -348,32 +348,22 @@ As we replaced the missing values with the interval average, the total daily ste
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
+We are using the full dataset where the missing values are replaced with the interval average. We would like to see whether the activity changes between different period of the week : { weekdays | weekend }
+
+The full dataset is expanded to include the period of the week indicator. The interval mean steps are then compared between the two period.
+
 
 ```r
+# add day of week
 wfa <- mutate(f_a, dayofweek = weekdays(date), isWeekend = (dayofweek=="Sunday" | dayofweek=="Saturday"))
+
+# flag weekend or weekdays for each observation
+
 wfa$period.of.week[wfa$isWeekend] = "weekend"
 wfa$period.of.week[!wfa$isWeekend] = "weekday"
-arrange(select(wfa, date, dayofweek, period.of.week, interval, timeofday, steps), date, interval)
-```
 
-```
-## Source: local data frame [17,568 x 6]
-## 
-##          date dayofweek period.of.week interval timeofday     steps
-## 1  2012-10-01    Monday        weekday        0     00:00 1.7169811
-## 2  2012-10-01    Monday        weekday        5     00:05 0.3396226
-## 3  2012-10-01    Monday        weekday       10     00:10 0.1320755
-## 4  2012-10-01    Monday        weekday       15     00:15 0.1509434
-## 5  2012-10-01    Monday        weekday       20     00:20 0.0754717
-## 6  2012-10-01    Monday        weekday       25     00:25 2.0943396
-## 7  2012-10-01    Monday        weekday       30     00:30 0.5283019
-## 8  2012-10-01    Monday        weekday       35     00:35 0.8679245
-## 9  2012-10-01    Monday        weekday       40     00:40 0.0000000
-## 10 2012-10-01    Monday        weekday       45     00:45 1.4716981
-## ..        ...       ...            ...      ...       ...       ...
-```
+#create summary of dataset by period of week and interval.
 
-```r
 pow_wfa <- wfa %>% group_by(period.of.week, interval) %>% summarize(interval.mean.step=mean(steps))
 pow_wfa
 ```
@@ -397,8 +387,14 @@ pow_wfa
 ```
 
 ```r
-library(lattice)
+# Compare the two period via lattice plot system
+
 xyplot(interval.mean.step~interval | period.of.week, data=pow_wfa, type="l", layout=c(1,2))
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-13-1.png) 
+
+#### Observation
+There is an intense activity at around 8am during the weekdays. This may be due to the rush hour to the workplace. The activity start very early in the morning at around 5am in weekdays. The activity are quite low between 10am to 4pm except for lunch break around 12-1pm. The activity gets slightly high at 4pm and again at 6pm. This may be due to the final rush to finish work and to have dinner respectively. Weekdays nighttime is quite calm.
+
+During the weekend, the day starts much later at around 8am. The activity remains high throughout the day and ends slightly later compared to weekdays. The activity envelop during weekends is higher than weekdays except for the morning rush.

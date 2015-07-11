@@ -202,14 +202,31 @@ As we replaced the missing values with the interval average, the total daily ste
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
+We are using the full dataset where the missing values are replaced with the interval average. We would like to see whether the activity changes between different period of the week : { weekdays | weekend }
+
+The full dataset is expanded to include the period of the week indicator. The interval mean steps are then compared between the two period.
+
 ```{r}
+# add day of week
 wfa <- mutate(f_a, dayofweek = weekdays(date), isWeekend = (dayofweek=="Sunday" | dayofweek=="Saturday"))
+
+# flag weekend or weekdays for each observation
+
 wfa$period.of.week[wfa$isWeekend] = "weekend"
 wfa$period.of.week[!wfa$isWeekend] = "weekday"
-arrange(select(wfa, date, dayofweek, period.of.week, interval, timeofday, steps), date, interval)
+
+#create summary of dataset by period of week and interval.
+
 pow_wfa <- wfa %>% group_by(period.of.week, interval) %>% summarize(interval.mean.step=mean(steps))
 pow_wfa
-library(lattice)
+
+# Compare the two period via lattice plot system
+
 xyplot(interval.mean.step~interval | period.of.week, data=pow_wfa, type="l", layout=c(1,2))
 
 ```
+
+#### Observation
+There is an intense activity at around 8am during the weekdays. This may be due to the rush hour to the workplace. The activity start very early in the morning at around 5am in weekdays. The activity are quite low between 10am to 4pm except for lunch break around 12-1pm. The activity gets slightly high at 4pm and again at 6pm. This may be due to the final rush to finish work and to have dinner respectively. Weekdays nighttime is quite calm.
+
+During the weekend, the day starts much later at around 8am. The activity remains high throughout the day and ends slightly later compared to weekdays. The activity envelop during weekends is higher than weekdays except for the morning rush.
