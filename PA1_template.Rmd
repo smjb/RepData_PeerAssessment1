@@ -5,14 +5,14 @@ output:
     keep_md: true
 ---
 
-_**Note:** This analysis uses_ **ggplot2**_,_ **lubridate**_,_ **dplyr** _and_ **xtable** _packages_
+_**Note:** This analysis uses_ **lattice**_,_ **lubridate**_,_ **dplyr** _and_ **xtable** _packages_
 
 ```{r, echo=FALSE, message=FALSE}
 ## setting up the session
 library(lubridate)
 library(xtable)
 library(dplyr)
-library(ggplot2)
+library(lattice)
 options(digits = 7)
 ```
 ## Loading and preprocessing the data
@@ -209,9 +209,7 @@ wfa$period.of.week[!wfa$isWeekend] = "weekday"
 arrange(select(wfa, date, dayofweek, period.of.week, interval, timeofday, steps), date, interval)
 pow_wfa <- wfa %>% group_by(period.of.week, interval) %>% summarize(interval.mean.step=mean(steps))
 pow_wfa
-wd_wfa <- pow_wfa[pow_wfa$period.of.week=="weekday", ]
-we_wfa <- pow_wfa[pow_wfa$period.of.week=="weekend", ]
-plot(wd_wfa$interval, wd_wfa$interval.mean.step, type="l", col="red", lwd=1)
-lines(we_wfa$interval, we_wfa$interval.mean.step,  col="green", lwd=1)
+library(lattice)
+xyplot(interval.mean.step~interval | period.of.week, data=pow_wfa, type="l", layout=c(1,2))
 
 ```
