@@ -5,21 +5,213 @@ output:
     keep_md: true
 ---
 
+_**Note:** This analysis uses_ **ggplot2**_,_ **lubridate**_,_ **dplyr** _and_ **xtable** _packages_
 
+```{r, echo=FALSE, message=FALSE}
+## setting up the session
+library(lubridate)
+library(xtable)
+library(dplyr)
+library(ggplot2)
+options(digits = 7)
+```
 ## Loading and preprocessing the data
 
+```{r}
+a <- read.csv("activity.csv", colClasses = c("integer", "Date", "integer"))
+```
+```{r, echo=FALSE}
+dim_a <- dim(a)
+variables <- dim_a[2]
+obs <- dim_a[1]
+
+steps_NA <- length(which(is.na(a$steps)))
+steps_Valid <- length(which(!is.na(a$steps)))
+
+date_NA <- length(which(is.na(a$date)))
+date_Valid <- length(which(!is.na(a$date)))
+
+interval_NA <- length(which(is.na(a$interval)))
+interval_Valid <- length(which(!is.na(a$interval)))
+
+aNA <- data.frame(c(steps_NA, date_NA, interval_NA), c(steps_Valid, date_Valid, interval_Valid))
+colnames(aNA) <- c("NAs", "Valid")
+rownames(aNA) <- names(a)
+
+xt <- xtable(aNA, caption = "Statistics of NA in each variable")
+
+```
+There are **`r obs`** observations with **`r variables`** variables named  **{ `r names(a)` }**. 
+
+```{r, showtable, results="asis", echo=FALSE}
+print(xt, type="html")
+```
+We filter out all observations with **steps** == **NA** into **tbl_df** type._ **dta** _will be the clean data we work on from now to answer the questions.
+
+```{r}
+dta <- tbl_df(a[!is.na(a$steps),])
+dta
+```
 
 
 ## What is mean total number of steps taken per day?
 
+```{r}
+daysteps <- dta %>% group_by(date) %>% summarise(sum(steps))
+colnames(daysteps) <- c("date", "day_steps")
+daysteps
+day_mean <- format(round(mean(daysteps$day_steps),2), nsmall=2)
+day_mean
+day_median <- format(round(median(daysteps$day_steps), 2), nsmall=2)
+day_median
 
+```
+The mean of the total number of steps taken per day is `r day_mean` and the median of the total number of steps taken per day is `r day_median`
+
+### The histogram of the total number of steps taken each day .
+```{r initialhistogram}
+param_hist <-hist(daysteps$day_steps, main="Total number of steps taken per day\n( with missing value discarded)", 
+                        xlab = "Number of Steps", ylab="Day frequency")
+
+abline(v=day_mean, col="red", lwd=7 )
+mid_range = max(param_hist$counts)/2
+text(x=day_mean, y=mid_range, paste("mean =", day_mean), pos=4, col = "red")
+abline(v=day_median, col="green", lwd=1)
+text(x=day_median, y=mid_range, paste("median =", day_median), pos=2, col = "green")
+```
 
 ## What is the average daily activity pattern?
 
+We would like to understand the activity pattern for each of the 5-minute interval. We would compare the daily average steps during the same interval.
+
+**Note:** _There are **`r 24*60/5`** _5-minutes interval_ per day. The interval notation is actually the (hour){minute) of the day. T he first interval of the day is noted `r 0` and last interval of the day is noted 2355. We will first format the interval to be in the notation hh:mm.
+
+```{r}
+interval_average <- dta %>% group_by(interval) %>% summarise(mean(steps))
+colnames(interval_average) <- c("interval", "interval.average.steps")
+# change to character type to allow string manipulation
+interval_average$interval = as.character(interval_average$interval)
+interval_average$timeofday = interval_average$interval
+
+#prepad interval with leading zeros
+
+for (x in 3:1) {
+    interval_average$timeofday[nchar(interval_average$interval)==x]<-
+        paste0(paste(rep("0", 4-x), collapse=''),interval_average$interval[nchar(interval_average$interval)==x])
+}
+# insert ":" between the hhmm to become hh:mm for readability purpose
+interval_average$timeofday = gsub('^([0-9]{2})([0-9]+)$', '\\1:\\2',interval_average$timeofday)
+interval_average
+
+```
+We localize the interval of which the average steps is maximum 
+```{r}
+max_average <- interval_average[interval_average$interval.average.steps==max(interval_average$interval.average.steps),]
+max_average
+max_pos <- which(interval_average$interval==max_average$interval)
+```
+The maximum value of `r max_average$interval.average.steps` is found at interval **`r max_average$interval`**. This interval is the **`r max_pos`-th** 5-minute interval of the day.
+
+### The activity pattern for each 5-minute interval is shown in the plot below
+```{r}
+#plot the pattern with x-axis interval of 4 hours
+plot(x=seq_along(interval_average$interval), 
+     y=interval_average$interval.average.steps,  
+     type="l", 
+     xaxt="n", 
+     xlab = "Time of Day", 
+     ylab = "Interval average steps", 
+     main = "Average steps by 5-min interval of day  ", 
+     lwd=3)
+
+axis_show = seq(1,(24*60/5)+1, by=4*12) # setup 4 hours axis tick, the extra 1 is to show the 24:00
+axis(1, at=axis_show, labels=interval_average$timeofday[axis_show]) # show axis with proper hour label spaced by 4 hours
+
+abline(v=max_pos, col="red", lwd=1 )
+abline(h=max_average$interval.average.steps, col="red", lwd=1 )
+
+text(x=max_pos, y=max_average$interval.average.steps, paste0("(x=",max_average$timeofday,", y=",format(round(max_average$interval.average.steps,2), nsmall=2),")"), pos=4 )
+
+```
 
 
 ## Imputing missing values
 
+As highlighted early in this report, the NAs identified as per table below. The values represent the number of rows of which the data is missing. Only **steps** has missing data. The previous analysis has discarded the missing data observation
+
+```{r, echo=F, results="asis"}
+print(xt, type="html")
+```
+To use full set of data, we can imputing the missing values with the 5-min interval average.
+We create new dataset **f_a** with full set of data
+
+
+```{r}
+#merging original dataset with the interval_average into new variable **t_a**
+f_a <- tbl_df(merge(a, interval_average, by = "interval"))
+f_a
+# set steps value = interval.average.step where steps is NA
+f_a$steps[is.na(f_a$steps)] = f_a$interval.average.steps[is.na(f_a$steps)]
+f_a
+
+f_daysteps <- f_a %>% group_by(date) %>% summarise(sum(steps))
+colnames(f_daysteps) <- c("date", "day_steps")
+f_daysteps
+f_day_mean <- format(round(mean(f_daysteps$day_steps),2), nsmall=2)
+f_day_mean
+f_day_median <- format(round(median(f_daysteps$day_steps), 2), nsmall=2)
+f_day_median
+
+
+```
+* The mean of the total number of steps taken per day when the missing data is replaced as described is **`r f_day_mean`** and the median of the total number of steps taken per day is **`r f_day_median`**
+* The mean of the total number of steps taken per day is **`r day_mean`** and the median of the total number of steps taken per day is **`r day_median`**
+
+
+The histograms are shown below.
+
+### The histogram of the total number of steps taken each day .
+
+#### With missing value substituted with interval average value
+```{r fullhistogram, fig.cap="Full Data Histogram with missing values replaced with the interval average"}
+f_param_hist <-hist(f_daysteps$day_steps, main="Total number of steps taken per day\n( with missing value substitued by interval average)",
+                        xlab = "Number of Steps", ylab="Day frequency")
+
+abline(v=f_day_mean, col="red", lwd=7 )
+f_mid_range = max(f_param_hist$counts)/2
+text(x=f_day_mean, y=f_mid_range, paste("mean =", f_day_mean), pos=4, col = "red")
+abline(v=f_day_median, col="green", lwd=1)
+text(x=f_day_median, y=f_mid_range, paste("median =", f_day_median), pos=2, col = "green")
+```
+
+#### [Reference] With missing values discarded as calculated earlier
+
+```{r ref.label='initialhistogram', echo=F, fig.cap="Initial Histogram"}
+```
+
+The mean seems not to be affected. However, number of date increased from `r dim(daysteps)[1]` to `r dim(f_daysteps)[1]` which means that there were days without observations. This can be observed with the following code.
+
+```{r}
+# dataset with missing values discarded
+param_hist$counts
+#dataset with missing values replaced with interval average 
+f_param_hist$counts
+```
+As we replaced the missing values with the interval average, the total daily steps is equal to the mean of the total daily steps. However, since the number of dates increased between the two datasets, the median could change. The additions are centered around mean of the total and as the median is very close to the mean, the new median is marginally affected.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+wfa <- mutate(f_a, dayofweek = weekdays(date), isWeekend = (dayofweek=="Sunday" | dayofweek=="Saturday"))
+wfa$period.of.week[wfa$isWeekend] = "weekend"
+wfa$period.of.week[!wfa$isWeekend] = "weekday"
+arrange(select(wfa, date, dayofweek, period.of.week, interval, timeofday, steps), date, interval)
+pow_wfa <- wfa %>% group_by(period.of.week, interval) %>% summarize(interval.mean.step=mean(steps))
+pow_wfa
+wd_wfa <- pow_wfa[pow_wfa$period.of.week=="weekday", ]
+we_wfa <- pow_wfa[pow_wfa$period.of.week=="weekend", ]
+plot(wd_wfa$interval, wd_wfa$interval.mean.step, type="l", col="red", lwd=1)
+lines(we_wfa$interval, we_wfa$interval.mean.step,  col="green", lwd=1)
+
+```
