@@ -44,8 +44,13 @@ xt <- xtable(aNA, caption = "Statistics of NA in each variable")
 ```
 There are **17568** observations with **3** variables named  **{ steps, date, interval }**. 
 
+
+```r
+print(xt, type="html")
+```
+
 <!-- html table generated in R 3.2.1 by xtable 1.7-4 package -->
-<!-- Sun Jul 12 15:58:38 2015 -->
+<!-- Sun Jul 12 16:10:49 2015 -->
 <table border=1>
 <caption align="bottom"> Statistics of NA in each variable </caption>
 <tr> <th>  </th> <th> NAs </th> <th> Valid </th>  </tr>
@@ -270,8 +275,13 @@ We would like to understand the effect of imputing the missing data to the analy
 
 As highlighted early in this report, the NAs have been identified as per table below. The values represent the number of rows of which the data is missing. Only **steps** has missing data. The previous analysis has discarded the missing data observation.
 
+
+```r
+print(xt, type="html")
+```
+
 <!-- html table generated in R 3.2.1 by xtable 1.7-4 package -->
-<!-- Sun Jul 12 15:58:38 2015 -->
+<!-- Sun Jul 12 16:10:49 2015 -->
 <table border=1>
 <caption align="bottom"> Statistics of NA in each variable </caption>
 <tr> <th>  </th> <th> NAs </th> <th> Valid </th>  </tr>
@@ -399,6 +409,24 @@ text(x=f_day_median, y=f_mid_range, paste("median =", f_day_median), pos=2, col 
 ![Full Data Histogram with missing values replaced with the interval average](figure/fullhistogram-1.png) 
 
 #### <span style="color:blue">[For Reference]</span> With missing values discarded as calculated earlier
+
+
+```r
+# histogram of total steps per day
+param_hist <-hist(daysteps$day_steps, 
+                  main="Total number of steps taken per day\n(with missing value discarded)", 
+                  xlab = "Number of Steps", 
+                  ylab="Number of Day "
+                  )
+# draw man line
+abline(v=day_mean, col="red", lwd=7 )
+mid_range = max(param_hist$counts)/2
+text(x=day_mean, y=mid_range, paste("mean =", day_mean), pos=4, col = "red")
+
+# draw median line
+abline(v=day_median, col="green", lwd=1)
+text(x=day_median, y=mid_range, paste("median =", day_median), pos=2, col = "green")
+```
 
 ![Initial Histogram](figure/unnamed-chunk-11-1.png) 
 

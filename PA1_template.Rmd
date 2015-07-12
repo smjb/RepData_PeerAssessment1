@@ -42,7 +42,7 @@ xt <- xtable(aNA, caption = "Statistics of NA in each variable")
 ```
 There are **`r obs`** observations with **`r variables`** variables named  **{ `r names(a)` }**. 
 
-```{r, showtable, results="asis", echo=FALSE}
+```{r, showtable, results="asis"}
 print(xt, type="html")
 
 ```
@@ -181,7 +181,7 @@ We would like to understand the effect of imputing the missing data to the analy
 
 As highlighted early in this report, the NAs have been identified as per table below. The values represent the number of rows of which the data is missing. Only **steps** has missing data. The previous analysis has discarded the missing data observation.
 
-```{r, echo=F, results="asis"}
+```{r, results="asis"}
 print(xt, type="html")
 ```
 To use full set of data, we can fill in the missing values with the rounded value of 5-min interval average since steps are integer by nature.
@@ -235,7 +235,7 @@ text(x=f_day_median, y=f_mid_range, paste("median =", f_day_median), pos=2, col 
 
 #### <span style="color:blue">[For Reference]</span> With missing values discarded as calculated earlier
 
-```{r ref.label='initialhistogram', echo=F, fig.cap="Initial Histogram"}
+```{r ref.label='initialhistogram', fig.cap="Initial Histogram"}
 ```
 
 ####Observations
