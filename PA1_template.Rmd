@@ -7,20 +7,19 @@ output:
 
 _**Note:** This analysis uses_ **lattice**_,_ **lubridate**_,_ **dplyr** _and_ **xtable** _packages_
 
-```{r, echo=FALSE, message=FALSE}
+```{r, message=FALSE}
 ## setting up the session
 library(lubridate)
 library(xtable)
 library(dplyr)
 library(lattice)
-options(digits = 7)
 ```
 ## Loading and preprocessing the data
 
 ```{r}
 a <- read.csv("activity.csv", colClasses = c("integer", "Date", "integer"))
 ```
-```{r, echo=FALSE}
+```{r}
 dim_a <- dim(a)
 variables <- dim_a[2]
 obs <- dim_a[1]

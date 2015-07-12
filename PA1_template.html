@@ -65,12 +65,35 @@ img {
 
 
 <p><em><strong>Note:</strong> This analysis uses</em> <strong>lattice</strong><em>,</em> <strong>lubridate</strong><em>,</em> <strong>dplyr</strong> <em>and</em> <strong>xtable</strong> <em>packages</em></p>
+<pre class="r"><code>## setting up the session
+library(lubridate)
+library(xtable)
+library(dplyr)
+library(lattice)</code></pre>
 <div id="loading-and-preprocessing-the-data" class="section level2">
 <h2>Loading and preprocessing the data</h2>
 <pre class="r"><code>a &lt;- read.csv(&quot;activity.csv&quot;, colClasses = c(&quot;integer&quot;, &quot;Date&quot;, &quot;integer&quot;))</code></pre>
+<pre class="r"><code>dim_a &lt;- dim(a)
+variables &lt;- dim_a[2]
+obs &lt;- dim_a[1]
+
+steps_NA &lt;- length(which(is.na(a$steps)))
+steps_Valid &lt;- length(which(!is.na(a$steps)))
+
+date_NA &lt;- length(which(is.na(a$date)))
+date_Valid &lt;- length(which(!is.na(a$date)))
+
+interval_NA &lt;- length(which(is.na(a$interval)))
+interval_Valid &lt;- length(which(!is.na(a$interval)))
+
+aNA &lt;- data.frame(c(steps_NA, date_NA, interval_NA), c(steps_Valid, date_Valid, interval_Valid))
+colnames(aNA) &lt;- c(&quot;NAs&quot;, &quot;Valid&quot;)
+rownames(aNA) &lt;- names(a)
+
+xt &lt;- xtable(aNA, caption = &quot;Statistics of NA in each variable&quot;)</code></pre>
 <p>There are <strong>17568</strong> observations with <strong>3</strong> variables named <strong>{ steps, date, interval }</strong>.</p>
 <!-- html table generated in R 3.2.1 by xtable 1.7-4 package -->
-<!-- Sun Jul 12 15:39:38 2015 -->
+<!-- Sun Jul 12 15:51:07 2015 -->
 <table border="1">
 <caption align="bottom">
 Statistics of NA in each variable
@@ -290,7 +313,7 @@ text(x=max_pos,
 <h3>Calculating the new values</h3>
 <p>As highlighted early in this report, the NAs have been identified as per table below. The values represent the number of rows of which the data is missing. Only <strong>steps</strong> has missing data. The previous analysis has discarded the missing data observation.</p>
 <!-- html table generated in R 3.2.1 by xtable 1.7-4 package -->
-<!-- Sun Jul 12 15:39:39 2015 -->
+<!-- Sun Jul 12 15:51:07 2015 -->
 <table border="1">
 <caption align="bottom">
 Statistics of NA in each variable

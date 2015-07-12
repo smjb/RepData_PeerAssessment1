@@ -3,6 +3,13 @@
 _**Note:** This analysis uses_ **lattice**_,_ **lubridate**_,_ **dplyr** _and_ **xtable** _packages_
 
 
+```r
+## setting up the session
+library(lubridate)
+library(xtable)
+library(dplyr)
+library(lattice)
+```
 ## Loading and preprocessing the data
 
 
@@ -10,10 +17,30 @@ _**Note:** This analysis uses_ **lattice**_,_ **lubridate**_,_ **dplyr** _and_ *
 a <- read.csv("activity.csv", colClasses = c("integer", "Date", "integer"))
 ```
 
+```r
+dim_a <- dim(a)
+variables <- dim_a[2]
+obs <- dim_a[1]
+
+steps_NA <- length(which(is.na(a$steps)))
+steps_Valid <- length(which(!is.na(a$steps)))
+
+date_NA <- length(which(is.na(a$date)))
+date_Valid <- length(which(!is.na(a$date)))
+
+interval_NA <- length(which(is.na(a$interval)))
+interval_Valid <- length(which(!is.na(a$interval)))
+
+aNA <- data.frame(c(steps_NA, date_NA, interval_NA), c(steps_Valid, date_Valid, interval_Valid))
+colnames(aNA) <- c("NAs", "Valid")
+rownames(aNA) <- names(a)
+
+xt <- xtable(aNA, caption = "Statistics of NA in each variable")
+```
 There are **17568** observations with **3** variables named  **{ steps, date, interval }**. 
 
 <!-- html table generated in R 3.2.1 by xtable 1.7-4 package -->
-<!-- Sun Jul 12 15:39:38 2015 -->
+<!-- Sun Jul 12 15:51:07 2015 -->
 <table border=1>
 <caption align="bottom"> Statistics of NA in each variable </caption>
 <tr> <th>  </th> <th> NAs </th> <th> Valid </th>  </tr>
@@ -239,7 +266,7 @@ We would like to understand the effect of imputing the missing data to the analy
 As highlighted early in this report, the NAs have been identified as per table below. The values represent the number of rows of which the data is missing. Only **steps** has missing data. The previous analysis has discarded the missing data observation.
 
 <!-- html table generated in R 3.2.1 by xtable 1.7-4 package -->
-<!-- Sun Jul 12 15:39:39 2015 -->
+<!-- Sun Jul 12 15:51:07 2015 -->
 <table border=1>
 <caption align="bottom"> Statistics of NA in each variable </caption>
 <tr> <th>  </th> <th> NAs </th> <th> Valid </th>  </tr>
