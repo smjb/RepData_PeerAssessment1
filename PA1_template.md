@@ -1,4 +1,9 @@
-# Reproducible Research: Peer Assessment 1
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
 
 _**Note:** This analysis uses_ **lattice**_,_ **lubridate**_,_ **dplyr** _and_ **xtable** _packages_
 
@@ -40,7 +45,7 @@ xt <- xtable(aNA, caption = "Statistics of NA in each variable")
 There are **17568** observations with **3** variables named  **{ steps, date, interval }**. 
 
 <!-- html table generated in R 3.2.1 by xtable 1.7-4 package -->
-<!-- Sun Jul 12 15:51:07 2015 -->
+<!-- Sun Jul 12 15:58:38 2015 -->
 <table border=1>
 <caption align="bottom"> Statistics of NA in each variable </caption>
 <tr> <th>  </th> <th> NAs </th> <th> Valid </th>  </tr>
@@ -151,7 +156,7 @@ abline(v=day_median, col="green", lwd=1)
 text(x=day_median, y=mid_range, paste("median =", day_median), pos=2, col = "green")
 ```
 
-![](PA1_template_files/figure-html/initialhistogram-1.png) 
+![plot of chunk initialhistogram](figure/initialhistogram-1.png) 
 
 ## What is the average daily activity pattern?
 
@@ -253,7 +258,7 @@ text(x=max_pos,
      pos=4 )
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
 
 
 ## Imputing missing values
@@ -266,7 +271,7 @@ We would like to understand the effect of imputing the missing data to the analy
 As highlighted early in this report, the NAs have been identified as per table below. The values represent the number of rows of which the data is missing. Only **steps** has missing data. The previous analysis has discarded the missing data observation.
 
 <!-- html table generated in R 3.2.1 by xtable 1.7-4 package -->
-<!-- Sun Jul 12 15:51:07 2015 -->
+<!-- Sun Jul 12 15:58:38 2015 -->
 <table border=1>
 <caption align="bottom"> Statistics of NA in each variable </caption>
 <tr> <th>  </th> <th> NAs </th> <th> Valid </th>  </tr>
@@ -391,11 +396,11 @@ abline(v=f_day_median, col="green", lwd=1)
 text(x=f_day_median, y=f_mid_range, paste("median =", f_day_median), pos=2, col = "green")
 ```
 
-![Full Data Histogram with missing values replaced with the interval average](PA1_template_files/figure-html/fullhistogram-1.png) 
+![Full Data Histogram with missing values replaced with the interval average](figure/fullhistogram-1.png) 
 
 #### <span style="color:blue">[For Reference]</span> With missing values discarded as calculated earlier
 
-![Initial Histogram](PA1_template_files/figure-html/unnamed-chunk-11-1.png) 
+![Initial Histogram](figure/unnamed-chunk-11-1.png) 
 
 ####Observations
 
@@ -477,7 +482,7 @@ xyplot(interval.mean.step~interval | period.of.week,
        layout=c(1,2))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-13-1.png) 
+![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13-1.png) 
 
 #### Observation
 There is an intense activity at around 8am during the weekdays. This may be due to the rush hour to the workplace. The activity start very early in the morning at around 5am in weekdays. The activity are quite low between 10am to 4pm except for lunch break around 12-1pm. The activity gets slightly high at 4pm and again at 6pm. This may be due to the final rush to finish work and to have dinner respectively. Weekdays nighttime is quite calm.
